@@ -33,7 +33,7 @@ char *find_in_path(char *command)
     return NULL;
 }
 
-void execute_cmd(char *path, char **argv, int options)
+void execute_cmd(char **argv, int options)
 { // 0-write to stdout, 1-write to my file.2-err
     pid_t pid = fork();
     if (pid == 0) // child process.
@@ -42,7 +42,7 @@ void execute_cmd(char *path, char **argv, int options)
         {
             freopen("store_output.txt", "w", stderr);
         }
-        execv(path, argv);
+        execvp(argv[0], argv);
         perror("execv");
         exit(1);
     }

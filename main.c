@@ -5,29 +5,36 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <ctype.h>
+
 #include "parser.h"
 #include "executor.h"
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#define history_size 10
+static char *line_read = (char *)NULL;
+char *rl_gets();
 
 int main()
 {
     // Flush after every printf
     setbuf(stdout, NULL); // so jha bhi printf hoga rather than storing the value to a buffer it will be flushed directly to stdout.
 
+    char *input;
+    // ok now this stores the executed commands in it.
     while (1)
     {
-        printf("42> ");
-        // Wait for user input
-        char input[100]; // this memeory allocated on stack
-        fgets(input, 100, stdin);
 
-        input[strcspn(input, "\n")] = 0;
+        input = rl_gets(); //\n removed
         char *clean_input;
 
         clean_input = process_input(input);
         char *inp_dup = strdup(clean_input);
         char *token = strtok(inp_dup, " "); // returns the first word. before space
 
-        // just looking for some of the builtins.
+        // can just direcctly add teh clean input in the history
+
         if (strcmp(token, "echo") == 0)
         {
             printf("%s\n", clean_input + 5);
@@ -62,18 +69,38 @@ int main()
         else
         { // the command needs to be looked for in the system and then needs to be executed in a different process
             char *inp_dup = strdup(clean_input);
-
             char **args = parse_command(inp_dup);
             char *cmd = args[0];
             char *path = find_in_path(cmd);
             if (path != NULL)
             {
-                execute_cmd(path, args, 1);
+                execute_cmd(args, 1);
             }
             free(args);
             free(inp_dup);
         }
+
+        free(clean_input);
     }
+
     return 0;
 }
+
+char *rl_gets()
+{
+
+    // If the buffer h}as already been allocated, return the memory
+    // to the free pool.
+    if (line_read)
+    {
+        free(line_read);
+        line_read = (char *)NULL;
+    }
+    line_read = readline("42> ");
+    if (line_read && *line_read)
+        add_history(line_read); // upon hitting the arrow keys like dup and down i canm get basically traverse through the command history
+
+    return (line_read);
+}
+
 // gcc -o main main.c parser.c executor.c or make a makefile
