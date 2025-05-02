@@ -73,7 +73,7 @@ int main()
             free(args);
             free(inp_dup);
         }
-        }
+    }
     return 0;
 }
 // gcc -o main main.c parser.c executor.c or make a makefile
