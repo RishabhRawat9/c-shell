@@ -1,9 +1,0 @@
-char *process_input(char *input) // removes the quotes and slashes.
-    char *processed_input = (char *)malloc(strlen(input) * sizeof(char));
-    char quote_char = 0;
-            quote_char = input[i];
-        else if (in_quotes && input[i] == quote_char)
-char **parse_command(char *input)
-    char *dup = strdup(input);
-    char **arr = malloc(10 * sizeof(char *));
-    char *token = strtok(dup, " ");
