@@ -33,7 +33,12 @@ int main()
         char *inp_dup = strdup(clean_input);
         char *token = strtok(inp_dup, " "); // returns the first word. before space
 
-        // can just direcctly add teh clean input in the history
+        if (strchr(clean_input, '>') != NULL)
+        {
+            printf("ok found redirect\n");
+            redirect_output(clean_input);
+            continue; // don't need to do anything else after redirecting the output.
+        }
 
         if (strcmp(token, "echo") == 0)
         {
@@ -74,7 +79,7 @@ int main()
             char *path = find_in_path(cmd);
             if (path != NULL)
             {
-                execute_cmd(args, 1);
+                execute_cmd(args, 0);
             }
             free(args);
             free(inp_dup);
@@ -85,11 +90,9 @@ int main()
 
     return 0;
 }
-
 char *rl_gets()
 {
-
-    // If the buffer h}as already been allocated, return the memory
+    // If the buffer has already been allocated, return the memory
     // to the free pool.
     if (line_read)
     {
@@ -99,8 +102,6 @@ char *rl_gets()
     line_read = readline("42> ");
     if (line_read && *line_read)
         add_history(line_read); // upon hitting the arrow keys like dup and down i canm get basically traverse through the command history
-
     return (line_read);
 }
-
 // gcc -o main main.c parser.c executor.c or make a makefile

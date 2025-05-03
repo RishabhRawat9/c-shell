@@ -1,6 +1,28 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
+
+void removeSpaces(char *str)
+{
+    int i = 0;
+
+    // Find the first non-space character
+    while (str[i] && isspace(str[i]))
+    {
+        i++;
+    }
+
+    // Shift the rest of the string to the beginning
+    int j = 0;
+    while (str[i])
+    {
+        str[j++] = str[i++];
+    }
+
+    str[j] = '\0'; // Null-terminate the new string
+}
+
 char *process_input(char *input) // removes the quotes and slashes.
 {
     char *processed_input = (char *)malloc(strlen(input) * sizeof(char));
