@@ -53,7 +53,7 @@ char *process_input(char *input) // removes the quotes and slashes.
     return processed_input;
 }
 
-char **parse_command(char *input)
+char **parse_command(char *input) // returns the arr of arguments for the command.
 {
     char *dup = strdup(input);
     char **arr = (char **)malloc(10 * sizeof(char *));

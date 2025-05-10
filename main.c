@@ -21,15 +21,23 @@ int main()
     // Flush after every printf
     setbuf(stdout, NULL); // so jha bhi printf hoga rather than storing the value to a buffer it will be flushed directly to stdout.
 
-    char *input;
+    char *input = NULL;
     // ok now this stores the executed commands in it.
     while (1)
     {
-
         input = rl_gets(); //\n removed
-        char *clean_input;
 
-        clean_input = process_input(input);
+        char *clean_input;
+        if (strcmp(input, "") != 0)
+        {
+
+            clean_input = process_input(input);
+        }
+        else
+        {
+            continue;
+        }
+
         char *inp_dup = strdup(clean_input);
         char *token = strtok(inp_dup, " "); // returns the first word. before space
 
@@ -81,6 +89,10 @@ int main()
             {
                 execute_cmd(args, 0);
             }
+            else
+            {
+                printf("command not found\n");
+            }
             free(args);
             free(inp_dup);
         }
@@ -99,9 +111,12 @@ char *rl_gets()
         free(line_read);
         line_read = (char *)NULL;
     }
-    line_read = readline("42> ");
+    line_read = readline("42>");
     if (line_read && *line_read)
-        add_history(line_read); // upon hitting the arrow keys like dup and down i canm get basically traverse through the command history
+    {
+        add_history(line_read);
+    }
+    // upon hitting the arrow keys like dup and down i canm  basically traverse through the command history
     return (line_read);
 }
-// gcc -o main main.c parser.c executor.c or make a makefile
+// gcc -o main main.c parser.c executor.c -lreadline or make a makefile
