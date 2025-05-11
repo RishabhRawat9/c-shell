@@ -28,6 +28,7 @@ int main()
         input = rl_gets(); //\n removed
 
         char *clean_input;
+
         if (strcmp(input, "") != 0)
         {
 
@@ -40,8 +41,13 @@ int main()
 
         char *inp_dup = strdup(clean_input);
         char *token = strtok(inp_dup, " "); // returns the first word. before space
-
-        if (strchr(clean_input, '>') != NULL)
+        if (strchr(clean_input, '|') != NULL)
+        {
+            printf("ok found pipe\n");
+            execute_pipe(clean_input);
+            continue;
+        }
+        else if (strchr(clean_input, '>') != NULL)
         {
             printf("ok found redirect\n");
             redirect_output(clean_input);
@@ -87,7 +93,7 @@ int main()
             char *path = find_in_path(cmd);
             if (path != NULL)
             {
-                execute_cmd(args, 0);
+                execute_cmd(args, 0, NULL);
             }
             else
             {

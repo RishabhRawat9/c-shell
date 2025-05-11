@@ -34,7 +34,7 @@ char *find_in_path(char *command)
     return NULL;
 }
 
-void execute_cmd(char **argv, int options)
+void execute_cmd(char **argv, int options, int *fd)
 { // 0-write to stdout, 1-write to my file.2-err
     pid_t pid = fork();
     if (pid == 0) // child process.
@@ -43,11 +43,25 @@ void execute_cmd(char **argv, int options)
         {
             freopen("store_output.txt", "w", stdout);
         }
-        if (options == 2)
+        else if (options == 2)
         {
             freopen("store_output.txt", "w", stderr);
         }
-        execvp(argv[0], argv);
+        else if (options == 3)
+        {
+            close(fd[0]);
+            dup2(fd[1], STDOUT_FILENO); // writes directly to fd[1] that is the pipe. basically duplicates the stdout
+            close(fd[1]);
+        }
+        else if (options == 4)
+        {
+
+            close(fd[1]);
+            dup2(fd[0], STDIN_FILENO);
+            close(fd[0]);
+        }
+
+        execvp(argv[0], argv); // so the output is wrriten to pipe when option is 3.
         perror("execv");
         exit(1);
     }
@@ -58,10 +72,36 @@ void execute_cmd(char **argv, int options)
     else
     {
         int status;
+        if (options == 3)
+        {
+            close(fd[1]);
+        }
+        else if (options == 4)
+        {
+            close(fd[0]);
+        }
         waitpid(pid, &status, 0);
     }
 }
+void execute_pipe(char *str) // cmd1 -f -f | cmd2 -a-f
+{
+    // the main program will be the parent for both the commands, it forks runs the first comd in child and then forks again and executes the sencond cmd in another child./
 
+    char *dup = strdup(str);
+    char *token = strchr(dup, '|');
+    *token = '\0';
+    char *cmd2 = token + 1;
+
+    int fd[2];
+
+    pipe(fd); // opens a file with two fds fd[0]-input side, fd[1]-output side.
+    printf("%s----%s \n", dup, cmd2);
+    char **argv = parse_command(dup);
+    execute_cmd(argv, 3, fd);
+    argv = NULL;
+    argv = parse_command(cmd2);
+    execute_cmd(argv, 4, fd);
+}
 void redirect_output(char *str) // the whole command.
 {
     char *dup = strdup(str);
@@ -156,7 +196,7 @@ void redirect_output(char *str) // the whole command.
     char *path = find_in_path(argv[0]);
     if (path != NULL)
     {
-        execute_cmd(argv, option); // 1->writing to store_output.txt
+        execute_cmd(argv, option, NULL); // 1->writing to store_output.txt
         // the command got executed and its output is written to the store_output.txt file
         // noow i need to read the file output file and write that to the redirect out put file.
         FILE *fptr_r = fopen("store_output.txt", "r");
